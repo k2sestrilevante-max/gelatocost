@@ -1,0 +1,1205 @@
+
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gelateria K2 Suite</title>
+  <meta name="description" content="Gestionale standalone per Gelateria K2, pronto per GitHub Pages." />
+  <style>
+    :root {
+      --bg: #0f1115;
+      --bg-2: #141821;
+      --card: #1b212c;
+      --card-2: #202736;
+      --text: #ebe7df;
+      --muted: #b7ae9f;
+      --dim: #8e877c;
+      --border: #2e3644;
+      --gold: #c8a96e;
+      --gold-2: #dbc08e;
+      --success: #59c17a;
+      --warn: #f0b44d;
+      --danger: #f07171;
+      --shadow: rgba(0,0,0,.28);
+      --input: #121722;
+      --pill: rgba(200,169,110,.12);
+    }
+    [data-theme="light"] {
+      --bg: #f6f1e8;
+      --bg-2: #efe6d8;
+      --card: #ffffff;
+      --card-2: #fbf7f1;
+      --text: #221d16;
+      --muted: #584d3f;
+      --dim: #7a6c5a;
+      --border: #deceb8;
+      --gold: #b38843;
+      --gold-2: #9b7232;
+      --success: #2f9152;
+      --warn: #b87b12;
+      --danger: #c75252;
+      --shadow: rgba(0,0,0,.10);
+      --input: #fffdf9;
+      --pill: rgba(179,136,67,.11);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--text); font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    body { display: flex; }
+    a { color: inherit; }
+    button, input, select, textarea { font: inherit; }
+    .app { display: flex; min-height: 100vh; width: 100%; }
+    .sidebar {
+      width: 240px; background: linear-gradient(180deg, var(--bg-2), var(--bg));
+      border-right: 1px solid var(--border); padding: 16px 12px; position: sticky; top: 0; height: 100vh;
+    }
+    .brand { display: flex; gap: 12px; align-items: center; margin-bottom: 18px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+    .brand .icon { font-size: 28px; }
+    .brand h1 { margin: 0; font-size: 16px; letter-spacing: .06em; color: var(--gold); text-transform: uppercase; }
+    .brand p { margin: 2px 0 0; color: var(--dim); font-size: 11px; }
+    .nav { display: grid; gap: 6px; }
+    .nav button {
+      border: 1px solid transparent; background: transparent; color: var(--muted); text-align: left;
+      border-radius: 12px; padding: 11px 12px; cursor: pointer; transition: .16s ease;
+    }
+    .nav button.active { background: var(--pill); border-color: var(--border); color: var(--gold); }
+    .nav button:hover { border-color: var(--border); color: var(--text); background: rgba(255,255,255,.02); }
+    .sidebar-footer { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border); display: grid; gap: 10px; }
+    .main { flex: 1; min-width: 0; }
+    .topbar {
+      position: sticky; top: 0; z-index: 5; background: color-mix(in srgb, var(--bg) 88%, transparent);
+      backdrop-filter: blur(12px); border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 22px;
+    }
+    .topbar-left, .topbar-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .badge, .pill {
+      display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 6px 10px;
+      border: 1px solid var(--border); background: var(--pill); color: var(--muted); font-size: 12px;
+    }
+    .gold { color: var(--gold); }
+    .wrap { padding: 22px; display: grid; gap: 18px; }
+    .grid { display: grid; gap: 16px; }
+    .grid.cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    .grid.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .grid.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .card {
+      background: linear-gradient(180deg, var(--card), var(--card-2));
+      border: 1px solid var(--border); border-radius: 18px; padding: 16px;
+      box-shadow: 0 8px 24px var(--shadow);
+    }
+    .card h2, .card h3 { margin: 0 0 10px; }
+    .card h2 { font-size: 16px; }
+    .card h3 { font-size: 14px; color: var(--gold); }
+    .stat-value { font-size: 28px; font-weight: 700; margin-top: 8px; }
+    .stat-label { font-size: 12px; color: var(--dim); }
+    .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    .row > * { min-width: 0; }
+    .field { display: grid; gap: 6px; flex: 1; min-width: 140px; }
+    .field label { font-size: 12px; color: var(--muted); }
+    input, select, textarea {
+      width: 100%; border-radius: 12px; border: 1px solid var(--border); background: var(--input);
+      color: var(--text); padding: 11px 12px; outline: none;
+    }
+    textarea { min-height: 90px; resize: vertical; }
+    .btn {
+      border: 1px solid var(--border); border-radius: 12px; padding: 11px 14px; cursor: pointer;
+      background: var(--card-2); color: var(--text); transition: .16s ease;
+    }
+    .btn:hover { transform: translateY(-1px); }
+    .btn.primary { background: linear-gradient(180deg, var(--gold), var(--gold-2)); color: #17130f; border-color: transparent; font-weight: 700; }
+    .btn.ghost { background: transparent; }
+    .btn.danger { background: rgba(240,113,113,.12); color: var(--danger); }
+    .btn.success { background: rgba(89,193,122,.12); color: var(--success); }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 10px 8px; border-bottom: 1px solid var(--border); text-align: left; font-size: 13px; vertical-align: top; }
+    th { color: var(--muted); font-weight: 600; }
+    tr:last-child td { border-bottom: 0; }
+    .muted { color: var(--muted); }
+    .dim { color: var(--dim); }
+    .ok { color: var(--success); }
+    .warn { color: var(--warn); }
+    .danger { color: var(--danger); }
+    .kpi { display: grid; gap: 4px; }
+    .list { display: grid; gap: 10px; }
+    .list-item { border: 1px solid var(--border); border-radius: 14px; padding: 12px; background: rgba(255,255,255,.02); }
+    .progress { height: 8px; background: rgba(255,255,255,.05); border-radius: 999px; overflow: hidden; }
+    .progress > span { display: block; height: 100%; background: linear-gradient(90deg, var(--gold), var(--gold-2)); }
+    .two-col { display: grid; gap: 18px; grid-template-columns: 1.2fr .8fr; }
+    .note { font-size: 12px; color: var(--dim); }
+    .empty { color: var(--dim); font-style: italic; padding: 8px 0; }
+    .footer-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .section-title { display: flex; justify-content: space-between; gap: 12px; align-items: end; flex-wrap: wrap; }
+    .section-title h2 { margin: 0; font-size: 22px; }
+    .section-title p { margin: 6px 0 0; color: var(--muted); }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .tag { padding: 4px 8px; border-radius: 999px; font-size: 11px; background: var(--pill); color: var(--muted); border: 1px solid var(--border); }
+    .split { display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+    .small { font-size: 12px; }
+    @media (max-width: 1120px) {
+      .grid.cols-4, .grid.cols-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .two-col, .grid.cols-2 { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 820px) {
+      body, .app { display: block; }
+      .sidebar { width: 100%; height: auto; position: static; }
+      .grid.cols-4, .grid.cols-3, .grid.cols-2 { grid-template-columns: 1fr; }
+      .topbar { position: static; }
+      .wrap { padding: 16px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script>
+  (() => {
+    const KEY = "k2-github-standalone-v1";
+
+    const defaults = {
+      theme: "dark",
+      currentSection: "dashboard",
+      currentStore: "Sestri Levante",
+      currentDate: new Date().toISOString().slice(0, 10),
+      ingredients: [
+        { id: uid(), name: "Latte intero fresco", category: "Latticini", cost: 0.00095, unit: "g", minStock: { "Sestri Levante": 12000, "Chiavari": 8000 }, stock: { "Sestri Levante": 24000, "Chiavari": 12000 } },
+        { id: uid(), name: "Panna fresca 35%", category: "Latticini", cost: 0.0038, unit: "g", minStock: { "Sestri Levante": 6000, "Chiavari": 4000 }, stock: { "Sestri Levante": 9000, "Chiavari": 4500 } },
+        { id: uid(), name: "Zucchero semolato", category: "Zuccheri", cost: 0.00105, unit: "g", minStock: { "Sestri Levante": 10000, "Chiavari": 6000 }, stock: { "Sestri Levante": 28000, "Chiavari": 14000 } },
+        { id: uid(), name: "Destrosio", category: "Zuccheri", cost: 0.0014, unit: "g", minStock: { "Sestri Levante": 4000, "Chiavari": 2500 }, stock: { "Sestri Levante": 6500, "Chiavari": 3100 } },
+        { id: uid(), name: "Pasta nocciola 100%", category: "Paste e aromi", cost: 0.011, unit: "g", minStock: { "Sestri Levante": 2500, "Chiavari": 1500 }, stock: { "Sestri Levante": 3400, "Chiavari": 1700 } },
+        { id: uid(), name: "Pasta pistacchio 100%", category: "Paste e aromi", cost: 0.026, unit: "g", minStock: { "Sestri Levante": 1800, "Chiavari": 1000 }, stock: { "Sestri Levante": 2100, "Chiavari": 1200 } },
+        { id: uid(), name: "Cioccolato fondente 70%", category: "Cioccolato", cost: 0.016, unit: "g", minStock: { "Sestri Levante": 3000, "Chiavari": 2000 }, stock: { "Sestri Levante": 5900, "Chiavari": 2600 } },
+        { id: uid(), name: "Fragole fresche", category: "Frutta", cost: 0.0035, unit: "g", minStock: { "Sestri Levante": 4000, "Chiavari": 2500 }, stock: { "Sestri Levante": 3600, "Chiavari": 1700 } }
+      ],
+      recipes: [],
+      sales: {
+        "Sestri Levante": {},
+        "Chiavari": {}
+      },
+      movements: [],
+      settings: { portionGrams: 150, targetFoodCostPct: 28 }
+    };
+
+    defaults.recipes = [
+      {
+        id: uid(),
+        name: "Fiordilatte",
+        category: "Creme classiche",
+        yieldG: 3000,
+        notes: "Base classica",
+        items: []
+      },
+      {
+        id: uid(),
+        name: "Nocciola",
+        category: "Creme classiche",
+        yieldG: 3000,
+        notes: "Pasta nocciola pura",
+        items: []
+      },
+      {
+        id: uid(),
+        name: "Pistacchio",
+        category: "Creme classiche",
+        yieldG: 3000,
+        notes: "Pasta pistacchio 100%",
+        items: []
+      },
+      {
+        id: uid(),
+        name: "Cioccolato Fondente",
+        category: "Creme classiche",
+        yieldG: 3000,
+        notes: "Fondente 70%",
+        items: []
+      },
+      {
+        id: uid(),
+        name: "Fragola",
+        category: "Frutta",
+        yieldG: 2500,
+        notes: "Sorbetto fragola",
+        items: []
+      }
+    ];
+
+    // fill recipe ingredients by name
+    const byName = name => defaults.ingredients.find(i => i.name === name)?.id;
+    defaults.recipes[0].items = [
+      { ingredientId: byName("Latte intero fresco"), grams: 1600 },
+      { ingredientId: byName("Panna fresca 35%"), grams: 500 },
+      { ingredientId: byName("Zucchero semolato"), grams: 380 },
+      { ingredientId: byName("Destrosio"), grams: 120 }
+    ];
+    defaults.recipes[1].items = [
+      { ingredientId: byName("Latte intero fresco"), grams: 1500 },
+      { ingredientId: byName("Panna fresca 35%"), grams: 300 },
+      { ingredientId: byName("Zucchero semolato"), grams: 340 },
+      { ingredientId: byName("Destrosio"), grams: 110 },
+      { ingredientId: byName("Pasta nocciola 100%"), grams: 380 }
+    ];
+    defaults.recipes[2].items = [
+      { ingredientId: byName("Latte intero fresco"), grams: 1450 },
+      { ingredientId: byName("Panna fresca 35%"), grams: 300 },
+      { ingredientId: byName("Zucchero semolato"), grams: 330 },
+      { ingredientId: byName("Destrosio"), grams: 100 },
+      { ingredientId: byName("Pasta pistacchio 100%"), grams: 320 }
+    ];
+    defaults.recipes[3].items = [
+      { ingredientId: byName("Latte intero fresco"), grams: 1400 },
+      { ingredientId: byName("Panna fresca 35%"), grams: 300 },
+      { ingredientId: byName("Zucchero semolato"), grams: 360 },
+      { ingredientId: byName("Destrosio"), grams: 100 },
+      { ingredientId: byName("Cioccolato fondente 70%"), grams: 350 }
+    ];
+    defaults.recipes[4].items = [
+      { ingredientId: byName("Fragole fresche"), grams: 1200 },
+      { ingredientId: byName("Zucchero semolato"), grams: 380 },
+      { ingredientId: byName("Destrosio"), grams: 120 }
+    ];
+
+    defaults.sales["Sestri Levante"][defaults.currentDate] = { contante: 420, pos: 910, delivery: 90, rivendita: 45, extra: 0, note: "" };
+    defaults.sales["Chiavari"][defaults.currentDate] = { contante: 180, pos: 370, delivery: 40, rivendita: 0, extra: 0, note: "" };
+    defaults.movements = [
+      { id: uid(), date: defaults.currentDate, store: "Sestri Levante", ingredientId: byName("Latte intero fresco"), type: "carico", grams: 10000, note: "Consegna mattina" },
+      { id: uid(), date: defaults.currentDate, store: "Chiavari", ingredientId: byName("Fragole fresche"), type: "scarico", grams: 800, note: "Produzione fragola" }
+    ];
+
+    const nav = [
+      ["dashboard", "🏠 Dashboard"],
+      ["incassi", "💶 Incassi"],
+      ["magazzino", "📦 Magazzino"],
+      ["ricettario", "📖 Ricettario"],
+      ["foodcost", "🧮 Food cost"],
+      ["impostazioni", "⚙️ Impostazioni"]
+    ];
+
+    let state = hydrate();
+
+    function uid() {
+      return Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+    }
+
+    function hydrate() {
+      try {
+        const raw = localStorage.getItem(KEY);
+        if (!raw) return deepClone(defaults);
+        const data = JSON.parse(raw);
+        return normalize(data);
+      } catch (e) {
+        return deepClone(defaults);
+      }
+    }
+
+    function normalize(data) {
+      const base = deepClone(defaults);
+      const out = Object.assign(base, data || {});
+      out.theme = out.theme === "light" ? "light" : "dark";
+      out.currentSection = nav.some(([id]) => id === out.currentSection) ? out.currentSection : "dashboard";
+      out.currentStore = ["Sestri Levante", "Chiavari"].includes(out.currentStore) ? out.currentStore : "Sestri Levante";
+      out.currentDate = String(out.currentDate || new Date().toISOString().slice(0, 10)).slice(0, 10);
+      out.ingredients = Array.isArray(out.ingredients) ? out.ingredients.map(i => ({
+        id: i.id || uid(),
+        name: String(i.name || "Ingrediente"),
+        category: String(i.category || "Altro"),
+        cost: Number(i.cost || 0),
+        unit: i.unit || "g",
+        minStock: mergeStoreMap(i.minStock, 0),
+        stock: mergeStoreMap(i.stock, 0)
+      })) : deepClone(defaults.ingredients);
+      out.recipes = Array.isArray(out.recipes) ? out.recipes.map(r => ({
+        id: r.id || uid(),
+        name: String(r.name || "Ricetta"),
+        category: String(r.category || "Altro"),
+        yieldG: Math.max(1, Number(r.yieldG || 1)),
+        notes: String(r.notes || ""),
+        items: Array.isArray(r.items) ? r.items.map(x => ({ ingredientId: String(x.ingredientId || ""), grams: Math.max(0, Number(x.grams || 0)) })).filter(x => x.ingredientId) : []
+      })) : deepClone(defaults.recipes);
+      out.sales = {
+        "Sestri Levante": (out.sales && out.sales["Sestri Levante"]) || {},
+        "Chiavari": (out.sales && out.sales["Chiavari"]) || {}
+      };
+      out.movements = Array.isArray(out.movements) ? out.movements.map(m => ({
+        id: m.id || uid(),
+        date: String(m.date || out.currentDate),
+        store: ["Sestri Levante", "Chiavari"].includes(m.store) ? m.store : "Sestri Levante",
+        ingredientId: String(m.ingredientId || ""),
+        type: ["carico", "scarico"].includes(m.type) ? m.type : "carico",
+        grams: Math.max(0, Number(m.grams || 0)),
+        note: String(m.note || "")
+      })).filter(m => m.ingredientId && m.grams > 0) : [];
+      out.settings = Object.assign({ portionGrams: 150, targetFoodCostPct: 28 }, out.settings || {});
+      out.settings.portionGrams = Math.max(1, Number(out.settings.portionGrams || 150));
+      out.settings.targetFoodCostPct = Math.max(1, Number(out.settings.targetFoodCostPct || 28));
+      return out;
+    }
+
+    function mergeStoreMap(map, fallback) {
+      return {
+        "Sestri Levante": Number(map && map["Sestri Levante"] != null ? map["Sestri Levante"] : fallback),
+        "Chiavari": Number(map && map["Chiavari"] != null ? map["Chiavari"] : fallback)
+      };
+    }
+
+    function persist() {
+      localStorage.setItem(KEY, JSON.stringify(state));
+    }
+
+    function deepClone(v) {
+      return JSON.parse(JSON.stringify(v));
+    }
+
+    function euro(value) {
+      return new Intl.NumberFormat("it-IT", { style: "currency", currency: "EUR" }).format(Number(value || 0));
+    }
+
+    function num(value, digits = 0) {
+      return new Intl.NumberFormat("it-IT", { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(Number(value || 0));
+    }
+
+    function dateIt(date) {
+      if (!date) return "";
+      const [y, m, d] = String(date).split("-");
+      if (!y || !m || !d) return date;
+      return `${d}/${m}/${y}`;
+    }
+
+    function ingredientById(id) {
+      return state.ingredients.find(i => i.id === id);
+    }
+
+    function saleRecord(store, date) {
+      return Object.assign({ contante: 0, pos: 0, delivery: 0, rivendita: 0, extra: 0, note: "" }, state.sales[store]?.[date] || {});
+    }
+
+    function saleTotal(row) {
+      return ["contante", "pos", "delivery", "rivendita", "extra"].reduce((s, k) => s + Number(row[k] || 0), 0);
+    }
+
+    function recipeCost(recipe) {
+      return recipe.items.reduce((sum, item) => {
+        const ing = ingredientById(item.ingredientId);
+        return sum + (ing ? Number(ing.cost || 0) * Number(item.grams || 0) : 0);
+      }, 0);
+    }
+
+    function recipePortions(recipe) {
+      return Math.max(1, Number(recipe.yieldG || 0) / Number(state.settings.portionGrams || 150));
+    }
+
+    function recipePortionCost(recipe) {
+      return recipeCost(recipe) / recipePortions(recipe);
+    }
+
+    function suggestedPrice(recipe) {
+      const pct = Number(state.settings.targetFoodCostPct || 28) / 100;
+      return pct > 0 ? recipePortionCost(recipe) / pct : recipePortionCost(recipe);
+    }
+
+    function lowStockCount(store) {
+      return state.ingredients.filter(ing => Number(ing.stock[store] || 0) < Number(ing.minStock[store] || 0)).length;
+    }
+
+    function recentSales(store) {
+      return Object.entries(state.sales[store] || {})
+        .map(([date, row]) => ({ date, ...row, total: saleTotal(row) }))
+        .sort((a, b) => b.date.localeCompare(a.date));
+    }
+
+    function lastMovements(limit = 8) {
+      return state.movements
+        .slice()
+        .sort((a, b) => (b.date + b.id).localeCompare(a.date + a.id))
+        .slice(0, limit);
+    }
+
+    function applyMovement(store, ingredientId, grams, type, note, date) {
+      const ing = ingredientById(ingredientId);
+      if (!ing) return false;
+      const qty = Math.max(0, Number(grams || 0));
+      if (!qty) return false;
+      if (type === "scarico" && Number(ing.stock[store] || 0) < qty) return false;
+      ing.stock[store] = Number(ing.stock[store] || 0) + (type === "carico" ? qty : -qty);
+      state.movements.unshift({ id: uid(), date, store, ingredientId, type, grams: qty, note: note || "" });
+      persist();
+      return true;
+    }
+
+    function render() {
+      document.documentElement.setAttribute("data-theme", state.theme);
+      document.body.setAttribute("data-theme", state.theme);
+
+      const store = state.currentStore;
+      const todaySaleStore = saleTotal(saleRecord(store, state.currentDate));
+      const todaySaleOther = saleTotal(saleRecord(otherStore(store), state.currentDate));
+
+      const app = document.getElementById("app");
+      app.innerHTML = `
+        <div class="app">
+          <aside class="sidebar">
+            <div class="brand">
+              <div class="icon">🍦</div>
+              <div>
+                <h1>Gelateria K2</h1>
+                <p>Suite standalone pronta per GitHub</p>
+              </div>
+            </div>
+
+            <nav class="nav">
+              ${nav.map(([id, label]) => `
+                <button class="${state.currentSection === id ? "active" : ""}" data-nav="${id}">
+                  ${label}
+                </button>
+              `).join("")}
+            </nav>
+
+            <div class="sidebar-footer">
+              <div class="pill">📍 ${store}</div>
+              <div class="pill">⚠️ ${lowStockCount(store)} sotto scorta</div>
+              <div class="pill">🧾 ${state.recipes.length} ricette</div>
+            </div>
+          </aside>
+
+          <main class="main">
+            <div class="topbar">
+              <div class="topbar-left">
+                <div>
+                  <div class="small dim">Sede attiva</div>
+                  <select id="storeSelect" style="min-width:180px">
+                    <option ${store === "Sestri Levante" ? "selected" : ""}>Sestri Levante</option>
+                    <option ${store === "Chiavari" ? "selected" : ""}>Chiavari</option>
+                  </select>
+                </div>
+                <div>
+                  <div class="small dim">Data lavoro</div>
+                  <input id="currentDate" type="date" value="${escapeHtml(state.currentDate)}" />
+                </div>
+                <span class="badge">Oggi ${euro(todaySaleStore)}</span>
+                <span class="badge">Altra sede ${euro(todaySaleOther)}</span>
+              </div>
+
+              <div class="topbar-right">
+                <div class="badge">Tema ${state.theme === "dark" ? "antracite" : "oro/crema"}</div>
+                <button class="btn ghost" id="themeToggle">${state.theme === "dark" ? "☀️ Chiaro" : "🌙 Scuro"}</button>
+              </div>
+            </div>
+
+            <div class="wrap">
+              ${renderSection()}
+            </div>
+          </main>
+        </div>
+      `;
+
+      wireGlobal();
+      wireSection();
+    }
+
+    function renderSection() {
+      switch (state.currentSection) {
+        case "dashboard": return renderDashboard();
+        case "incassi": return renderIncassi();
+        case "magazzino": return renderMagazzino();
+        case "ricettario": return renderRicettario();
+        case "foodcost": return renderFoodCost();
+        case "impostazioni": return renderImpostazioni();
+        default: return renderDashboard();
+      }
+    }
+
+    function renderDashboard() {
+      const store = state.currentStore;
+      const sales = recentSales(store);
+      const sevenDays = sales.slice(0, 7).reduce((s, r) => s + r.total, 0);
+      const ingredients = state.ingredients.length;
+      const recipes = state.recipes.length;
+      const low = lowStockCount(store);
+
+      return `
+        <div class="section-title">
+          <div>
+            <h2>Dashboard</h2>
+            <p>Panoramica rapida della sede <strong>${store}</strong>.</p>
+          </div>
+        </div>
+
+        <div class="grid cols-4">
+          <div class="card kpi">
+            <div class="stat-label">Incasso oggi</div>
+            <div class="stat-value">${euro(saleTotal(saleRecord(store, state.currentDate)))}</div>
+            <div class="dim small">${dateIt(state.currentDate)}</div>
+          </div>
+          <div class="card kpi">
+            <div class="stat-label">Ultimi 7 giorni</div>
+            <div class="stat-value">${euro(sevenDays)}</div>
+            <div class="dim small">somma sede attiva</div>
+          </div>
+          <div class="card kpi">
+            <div class="stat-label">Ingredienti attivi</div>
+            <div class="stat-value">${ingredients}</div>
+            <div class="dim small">materie prime gestite</div>
+          </div>
+          <div class="card kpi">
+            <div class="stat-label">Sotto scorta</div>
+            <div class="stat-value ${low ? "danger" : "ok"}">${low}</div>
+            <div class="dim small">ingredienti da reintegrare</div>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <div class="card">
+            <div class="section-title">
+              <div>
+                <h2>Ultimi movimenti</h2>
+                <p>Carichi e scarichi recenti.</p>
+              </div>
+            </div>
+            <div class="list">
+              ${lastMovements().map(m => {
+                const ing = ingredientById(m.ingredientId);
+                return `
+                  <div class="list-item">
+                    <div class="split">
+                      <strong>${escapeHtml(ing ? ing.name : "Ingrediente")}</strong>
+                      <span class="tag ${m.type === "carico" ? "ok" : "warn"}">${m.type === "carico" ? "Carico" : "Scarico"}</span>
+                    </div>
+                    <div class="small muted">${m.store} · ${dateIt(m.date)} · ${num(m.grams)} g</div>
+                    <div class="small dim">${escapeHtml(m.note || "—")}</div>
+                  </div>
+                `;
+              }).join("") || `<div class="empty">Nessun movimento registrato.</div>`}
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="section-title">
+              <div>
+                <h2>Scorte critiche</h2>
+                <p>Livello stock rispetto al minimo.</p>
+              </div>
+            </div>
+            <div class="list">
+              ${state.ingredients
+                .slice()
+                .sort((a, b) => ((a.stock[store] / Math.max(a.minStock[store], 1)) - (b.stock[store] / Math.max(b.minStock[store], 1))))
+                .slice(0, 5)
+                .map(ing => {
+                  const current = Number(ing.stock[store] || 0);
+                  const min = Math.max(1, Number(ing.minStock[store] || 0));
+                  const pct = Math.max(0, Math.min(100, Math.round((current / min) * 100)));
+                  return `
+                    <div class="list-item">
+                      <div class="split">
+                        <strong>${escapeHtml(ing.name)}</strong>
+                        <span class="${current < min ? "danger" : "ok"}">${num(current)} g</span>
+                      </div>
+                      <div class="small muted">Minimo: ${num(min)} g</div>
+                      <div class="progress"><span style="width:${pct}%"></span></div>
+                    </div>
+                  `;
+                }).join("")}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderIncassi() {
+      const store = state.currentStore;
+      const row = saleRecord(store, state.currentDate);
+      const list = recentSales(store).slice(0, 12);
+
+      return `
+        <div class="section-title">
+          <div>
+            <h2>Incassi</h2>
+            <p>Inserimento giornaliero e storico rapido della sede <strong>${store}</strong>.</p>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="row">
+            ${["contante", "pos", "delivery", "rivendita", "extra"].map(key => `
+              <div class="field">
+                <label>${capitalize(key)}</label>
+                <input type="number" step="0.01" min="0" id="sale_${key}" value="${Number(row[key] || 0)}" />
+              </div>
+            `).join("")}
+          </div>
+          <div class="row" style="margin-top:12px">
+            <div class="field" style="min-width:280px">
+              <label>Note</label>
+              <input id="sale_note" value="${escapeAttr(row.note || "")}" placeholder="Annotazioni del giorno" />
+            </div>
+            <div class="field" style="max-width:220px">
+              <label>Totale</label>
+              <input value="${euro(saleTotal(row))}" disabled />
+            </div>
+          </div>
+          <div class="footer-actions" style="margin-top:12px">
+            <button class="btn primary" id="saveSalesBtn">Salva incasso</button>
+            <button class="btn ghost" id="clearSalesBtn">Azzera giorno</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Storico recente</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Contante</th>
+                <th>POS</th>
+                <th>Delivery</th>
+                <th>Rivendita</th>
+                <th>Extra</th>
+                <th>Totale</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${list.map(r => `
+                <tr>
+                  <td>${dateIt(r.date)}</td>
+                  <td>${euro(r.contante)}</td>
+                  <td>${euro(r.pos)}</td>
+                  <td>${euro(r.delivery)}</td>
+                  <td>${euro(r.rivendita)}</td>
+                  <td>${euro(r.extra)}</td>
+                  <td><strong>${euro(r.total)}</strong></td>
+                </tr>
+              `).join("") || `<tr><td colspan="7" class="empty">Nessun incasso salvato.</td></tr>`}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderMagazzino() {
+      const store = state.currentStore;
+      const rows = state.ingredients
+        .slice()
+        .sort((a, b) => a.name.localeCompare(b.name, "it"));
+
+      return `
+        <div class="section-title">
+          <div>
+            <h2>Magazzino</h2>
+            <p>Scorte per sede, nuovi ingredienti e movimenti veloci.</p>
+          </div>
+        </div>
+
+        <div class="grid cols-2">
+          <div class="card">
+            <h2>Nuovo movimento</h2>
+            <div class="row">
+              <div class="field" style="min-width:260px">
+                <label>Ingrediente</label>
+                <select id="movementIngredient">
+                  ${state.ingredients.map(i => `<option value="${i.id}">${escapeHtml(i.name)}</option>`).join("")}
+                </select>
+              </div>
+              <div class="field" style="max-width:140px">
+                <label>Tipo</label>
+                <select id="movementType">
+                  <option value="carico">Carico</option>
+                  <option value="scarico">Scarico</option>
+                </select>
+              </div>
+              <div class="field" style="max-width:140px">
+                <label>Quantità g</label>
+                <input id="movementGrams" type="number" min="1" step="1" value="1000" />
+              </div>
+            </div>
+            <div class="row" style="margin-top:12px">
+              <div class="field">
+                <label>Nota</label>
+                <input id="movementNote" placeholder="es. consegna, produzione, rettifica..." />
+              </div>
+            </div>
+            <div class="footer-actions" style="margin-top:12px">
+              <button class="btn primary" id="saveMovementBtn">Registra movimento</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>Nuovo ingrediente</h2>
+            <div class="row">
+              <div class="field">
+                <label>Nome</label>
+                <input id="newIngName" placeholder="es. Yogurt intero" />
+              </div>
+              <div class="field">
+                <label>Categoria</label>
+                <input id="newIngCategory" placeholder="es. Latticini" />
+              </div>
+            </div>
+            <div class="row" style="margin-top:12px">
+              <div class="field">
+                <label>Costo €/g</label>
+                <input id="newIngCost" type="number" min="0" step="0.0001" placeholder="0.0010" />
+              </div>
+              <div class="field">
+                <label>Stock iniziale ${store}</label>
+                <input id="newIngStock" type="number" min="0" step="1" placeholder="0" />
+              </div>
+              <div class="field">
+                <label>Scorta minima ${store}</label>
+                <input id="newIngMin" type="number" min="0" step="1" placeholder="0" />
+              </div>
+            </div>
+            <div class="footer-actions" style="margin-top:12px">
+              <button class="btn success" id="addIngredientBtn">Aggiungi ingrediente</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Stock ingredienti · ${store}</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Ingrediente</th>
+                <th>Categoria</th>
+                <th>Stock</th>
+                <th>Minimo</th>
+                <th>Stato</th>
+                <th>Costo €/kg</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rows.map(ing => {
+                const current = Number(ing.stock[store] || 0);
+                const min = Number(ing.minStock[store] || 0);
+                const low = current < min;
+                return `
+                  <tr>
+                    <td><strong>${escapeHtml(ing.name)}</strong></td>
+                    <td>${escapeHtml(ing.category)}</td>
+                    <td>${num(current)} g</td>
+                    <td>${num(min)} g</td>
+                    <td><span class="${low ? "danger" : "ok"}">${low ? "Sotto scorta" : "OK"}</span></td>
+                    <td>${euro(Number(ing.cost || 0) * 1000)}</td>
+                  </tr>
+                `;
+              }).join("")}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderRicettario() {
+      return `
+        <div class="section-title">
+          <div>
+            <h2>Ricettario</h2>
+            <p>Ricette base con parsing rapido degli ingredienti.</p>
+          </div>
+        </div>
+
+        <div class="grid cols-2">
+          <div class="card">
+            <h2>Nuova ricetta</h2>
+            <div class="row">
+              <div class="field">
+                <label>Nome</label>
+                <input id="newRecipeName" placeholder="es. Crema Vaniglia" />
+              </div>
+              <div class="field">
+                <label>Categoria</label>
+                <input id="newRecipeCategory" placeholder="es. Creme classiche" />
+              </div>
+              <div class="field">
+                <label>Resa g</label>
+                <input id="newRecipeYield" type="number" min="1" step="1" placeholder="3000" />
+              </div>
+            </div>
+            <div class="field" style="margin-top:12px">
+              <label>Ingredienti (una riga per ingrediente)</label>
+              <textarea id="newRecipeItems" placeholder="Latte intero fresco=1500&#10;Zucchero semolato=320&#10;Panna fresca 35%=280"></textarea>
+            </div>
+            <div class="field" style="margin-top:12px">
+              <label>Note</label>
+              <input id="newRecipeNotes" placeholder="Note facoltative" />
+            </div>
+            <div class="footer-actions" style="margin-top:12px">
+              <button class="btn primary" id="addRecipeBtn">Salva ricetta</button>
+            </div>
+            <div class="note" style="margin-top:10px">Formato: <span class="mono">Nome Ingrediente=grammi</span>. Se l’ingrediente non esiste, va aggiunto prima in Magazzino.</div>
+          </div>
+
+          <div class="card">
+            <h2>Ricette presenti</h2>
+            <div class="list">
+              ${state.recipes.map(recipe => `
+                <div class="list-item">
+                  <div class="split">
+                    <div>
+                      <strong>${escapeHtml(recipe.name)}</strong>
+                      <div class="small muted">${escapeHtml(recipe.category)} · resa ${num(recipe.yieldG)} g</div>
+                    </div>
+                    <button class="btn ghost" data-del-recipe="${recipe.id}">Elimina</button>
+                  </div>
+                  <div class="small" style="margin-top:8px">${escapeHtml(recipe.notes || "—")}</div>
+                  <div class="small dim" style="margin-top:8px">
+                    ${recipe.items.map(item => {
+                      const ing = ingredientById(item.ingredientId);
+                      return `${escapeHtml(ing ? ing.name : "Ingrediente")} (${num(item.grams)} g)`;
+                    }).join(" · ") || "Nessun ingrediente"}
+                  </div>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderFoodCost() {
+      return `
+        <div class="section-title">
+          <div>
+            <h2>Food cost</h2>
+            <p>Calcolo rapido del costo ricetta e prezzo suggerito per porzione.</p>
+          </div>
+        </div>
+
+        <div class="grid cols-3">
+          <div class="card">
+            <div class="stat-label">Porzione standard</div>
+            <div class="stat-value">${num(state.settings.portionGrams)} g</div>
+            <div class="small dim">modificabile in Impostazioni</div>
+          </div>
+          <div class="card">
+            <div class="stat-label">Target food cost</div>
+            <div class="stat-value">${num(state.settings.targetFoodCostPct, 0)}%</div>
+            <div class="small dim">usato per il prezzo suggerito</div>
+          </div>
+          <div class="card">
+            <div class="stat-label">Ricette</div>
+            <div class="stat-value">${state.recipes.length}</div>
+            <div class="small dim">incluse nel calcolo</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <table>
+            <thead>
+              <tr>
+                <th>Ricetta</th>
+                <th>Categoria</th>
+                <th>Costo mix</th>
+                <th>Costo / kg</th>
+                <th>Costo porzione</th>
+                <th>Prezzo suggerito</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${state.recipes.map(recipe => {
+                const cost = recipeCost(recipe);
+                const costKg = recipe.yieldG ? (cost / recipe.yieldG) * 1000 : 0;
+                const portion = recipePortionCost(recipe);
+                const price = suggestedPrice(recipe);
+                return `
+                  <tr>
+                    <td><strong>${escapeHtml(recipe.name)}</strong></td>
+                    <td>${escapeHtml(recipe.category)}</td>
+                    <td>${euro(cost)}</td>
+                    <td>${euro(costKg)}</td>
+                    <td>${euro(portion)}</td>
+                    <td><strong class="gold">${euro(price)}</strong></td>
+                  </tr>
+                `;
+              }).join("")}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function renderImpostazioni() {
+      return `
+        <div class="section-title">
+          <div>
+            <h2>Impostazioni</h2>
+            <p>Parametri generali, export/import e reset completo.</p>
+          </div>
+        </div>
+
+        <div class="grid cols-2">
+          <div class="card">
+            <h2>Parametri</h2>
+            <div class="row">
+              <div class="field">
+                <label>Grammi per porzione</label>
+                <input id="portionGrams" type="number" min="1" step="1" value="${Number(state.settings.portionGrams || 150)}" />
+              </div>
+              <div class="field">
+                <label>Target food cost %</label>
+                <input id="targetPct" type="number" min="1" step="1" value="${Number(state.settings.targetFoodCostPct || 28)}" />
+              </div>
+            </div>
+            <div class="footer-actions" style="margin-top:12px">
+              <button class="btn primary" id="saveSettingsBtn">Salva impostazioni</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <h2>Tema</h2>
+            <div class="row">
+              <button class="btn ${state.theme === "dark" ? "primary" : ""}" id="setDarkTheme">Scuro antracite</button>
+              <button class="btn ${state.theme === "light" ? "primary" : ""}" id="setLightTheme">Chiaro oro/crema</button>
+            </div>
+            <div class="note" style="margin-top:10px">Questa versione è standalone: niente build, niente React, niente schermata bianca da bundler.</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>Dati</h2>
+          <div class="footer-actions">
+            <button class="btn success" id="exportBtn">Esporta backup JSON</button>
+            <label class="btn ghost" for="importFile">Importa backup JSON</label>
+            <input id="importFile" type="file" accept="application/json" style="display:none" />
+            <button class="btn danger" id="resetBtn">Reset completo</button>
+          </div>
+          <div class="note" style="margin-top:10px">Il reset cancella i dati locali del browser per questo sito.</div>
+        </div>
+      `;
+    }
+
+    function wireGlobal() {
+      document.querySelectorAll("[data-nav]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          state.currentSection = btn.dataset.nav;
+          persist();
+          render();
+        });
+      });
+
+      document.getElementById("storeSelect").addEventListener("change", e => {
+        state.currentStore = e.target.value;
+        persist();
+        render();
+      });
+
+      document.getElementById("currentDate").addEventListener("change", e => {
+        state.currentDate = e.target.value;
+        persist();
+        render();
+      });
+
+      document.getElementById("themeToggle").addEventListener("click", () => {
+        state.theme = state.theme === "dark" ? "light" : "dark";
+        persist();
+        render();
+      });
+    }
+
+    function wireSection() {
+      switch (state.currentSection) {
+        case "incassi":
+          wireIncassi();
+          break;
+        case "magazzino":
+          wireMagazzino();
+          break;
+        case "ricettario":
+          wireRicettario();
+          break;
+        case "impostazioni":
+          wireImpostazioni();
+          break;
+      }
+    }
+
+    function wireIncassi() {
+      const store = state.currentStore;
+      const date = state.currentDate;
+
+      document.getElementById("saveSalesBtn").addEventListener("click", () => {
+        const row = {
+          contante: readNum("sale_contante"),
+          pos: readNum("sale_pos"),
+          delivery: readNum("sale_delivery"),
+          rivendita: readNum("sale_rivendita"),
+          extra: readNum("sale_extra"),
+          note: document.getElementById("sale_note").value.trim()
+        };
+        state.sales[store][date] = row;
+        persist();
+        alert("Incasso salvato.");
+        render();
+      });
+
+      document.getElementById("clearSalesBtn").addEventListener("click", () => {
+        if (!confirm("Azzero i dati del giorno selezionato?")) return;
+        delete state.sales[store][date];
+        persist();
+        render();
+      });
+    }
+
+    function wireMagazzino() {
+      document.getElementById("saveMovementBtn").addEventListener("click", () => {
+        const ok = applyMovement(
+          state.currentStore,
+          document.getElementById("movementIngredient").value,
+          readNum("movementGrams"),
+          document.getElementById("movementType").value,
+          document.getElementById("movementNote").value.trim(),
+          state.currentDate
+        );
+        if (!ok) {
+          alert("Movimento non valido. Controlla quantità e disponibilità.");
+          return;
+        }
+        render();
+      });
+
+      document.getElementById("addIngredientBtn").addEventListener("click", () => {
+        const name = document.getElementById("newIngName").value.trim();
+        const category = document.getElementById("newIngCategory").value.trim() || "Altro";
+        const cost = readNum("newIngCost");
+        const stock = readNum("newIngStock");
+        const min = readNum("newIngMin");
+        if (!name) {
+          alert("Inserisci il nome ingrediente.");
+          return;
+        }
+        state.ingredients.push({
+          id: uid(),
+          name,
+          category,
+          cost,
+          unit: "g",
+          stock: mergeStoreMap({ [state.currentStore]: stock }, 0),
+          minStock: mergeStoreMap({ [state.currentStore]: min }, 0)
+        });
+        persist();
+        render();
+      });
+    }
+
+    function wireRicettario() {
+      document.getElementById("addRecipeBtn").addEventListener("click", () => {
+        const name = document.getElementById("newRecipeName").value.trim();
+        const category = document.getElementById("newRecipeCategory").value.trim() || "Altro";
+        const yieldG = readNum("newRecipeYield");
+        const notes = document.getElementById("newRecipeNotes").value.trim();
+        const raw = document.getElementById("newRecipeItems").value.trim();
+
+        if (!name || !yieldG || !raw) {
+          alert("Compila nome, resa e ingredienti.");
+          return;
+        }
+
+        const items = [];
+        const lines = raw.split(/\n+/).map(s => s.trim()).filter(Boolean);
+        for (const line of lines) {
+          const [left, right] = line.split("=");
+          const ingName = (left || "").trim();
+          const grams = Number((right || "").replace(",", "."));
+          const ing = state.ingredients.find(i => i.name.toLowerCase() === ingName.toLowerCase());
+          if (!ing) {
+            alert(`Ingrediente non trovato: ${ingName}`);
+            return;
+          }
+          if (!grams || grams < 0) {
+            alert(`Grammi non validi nella riga: ${line}`);
+            return;
+          }
+          items.push({ ingredientId: ing.id, grams });
+        }
+
+        state.recipes.unshift({ id: uid(), name, category, yieldG, notes, items });
+        persist();
+        render();
+      });
+
+      document.querySelectorAll("[data-del-recipe]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          if (!confirm("Elimino questa ricetta?")) return;
+          state.recipes = state.recipes.filter(r => r.id !== btn.dataset.delRecipe);
+          persist();
+          render();
+        });
+      });
+    }
+
+    function wireImpostazioni() {
+      document.getElementById("saveSettingsBtn").addEventListener("click", () => {
+        state.settings.portionGrams = readNum("portionGrams") || 150;
+        state.settings.targetFoodCostPct = readNum("targetPct") || 28;
+        persist();
+        alert("Impostazioni salvate.");
+        render();
+      });
+
+      document.getElementById("setDarkTheme").addEventListener("click", () => {
+        state.theme = "dark"; persist(); render();
+      });
+      document.getElementById("setLightTheme").addEventListener("click", () => {
+        state.theme = "light"; persist(); render();
+      });
+
+      document.getElementById("exportBtn").addEventListener("click", () => {
+        const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `k2-backup-${state.currentDate}.json`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+      });
+
+      document.getElementById("importFile").addEventListener("change", async e => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        try {
+          const text = await file.text();
+          state = normalize(JSON.parse(text));
+          persist();
+          render();
+          alert("Backup importato.");
+        } catch (err) {
+          alert("File non valido.");
+        }
+      });
+
+      document.getElementById("resetBtn").addEventListener("click", () => {
+        if (!confirm("Cancello tutti i dati locali e torno ai valori iniziali?")) return;
+        localStorage.removeItem(KEY);
+        state = deepClone(defaults);
+        persist();
+        render();
+      });
+    }
+
+    function readNum(id) {
+      const el = document.getElementById(id);
+      return Number(String(el.value || "0").replace(",", ".")) || 0;
+    }
+
+    function otherStore(store) {
+      return store === "Sestri Levante" ? "Chiavari" : "Sestri Levante";
+    }
+
+    function capitalize(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    function escapeHtml(str) {
+      return String(str == null ? "" : str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;");
+    }
+
+    function escapeAttr(str) {
+      return escapeHtml(str).replaceAll('"', "&quot;");
+    }
+
+    persist();
+    render();
+  })();
+  </script>
+</body>
+</html>
